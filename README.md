@@ -27,7 +27,7 @@ $ mvn clean install
 
 # O servidor inciará na porta:8026 - acesse <http://localhost:8026>
 
-# A documentacao rest da aplicacao swagger esta disponivel - acesse <http://localhost:8026/swagger-ui.htm>
+# A documentacao rest da aplicacao swagger esta disponivel - acesse <http://localhost:8026/swagger-ui.html#/>
 
 Diagrama relacional:
 ![image](https://user-images.githubusercontent.com/13227913/119141979-51d9a200-ba1c-11eb-9e86-809b621c98a5.png)
