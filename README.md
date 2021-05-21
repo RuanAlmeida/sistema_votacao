@@ -29,6 +29,10 @@ $ mvn clean install
 
 # A documentacao rest da aplicacao swagger esta disponivel - acesse <http://localhost:8026/swagger-ui.htm>
 
+Diagrama relacional:
+![image](https://user-images.githubusercontent.com/13227913/119141979-51d9a200-ba1c-11eb-9e86-809b621c98a5.png)
+
+
 ### 🛠 Tecnologias
 
 As seguintes ferramentas foram usadas na construção do projeto:
