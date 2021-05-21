@@ -6,6 +6,7 @@ import com.sistema.votacao.repositories.PautaRepository;
 import com.sistema.votacao.services.PautaService;
 import com.sistema.votacao.services.dto.PautaDTO;
 import com.sistema.votacao.services.dto.PautaVotadaDTO;
+import com.sistema.votacao.services.dto.ResultadoPautaEleitaDTO;
 import com.sistema.votacao.services.exception.ObjectNotFoundException;
 import com.sistema.votacao.services.utils.MensagensUtils;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -31,7 +35,7 @@ public class PautaServiceImpl implements PautaService {
         pautaRepository.save(setPautaFromPautaDTO(pautaDTO));
     }
 
-    private Pauta setPautaFromPautaDTO(PautaDTO pautaDTO){
+    private Pauta setPautaFromPautaDTO(PautaDTO pautaDTO) {
         Pauta pauta = new Pauta();
         pauta.setDescricao(pautaDTO.getDescricao());
         pauta.setVersao(pautaDTO.getVersao());
@@ -65,5 +69,42 @@ public class PautaServiceImpl implements PautaService {
         log.debug("Paginacao da pauta", page, linesPerPage);
         PageRequest pageRequest = PageRequest.of(page, linesPerPage);
         return pautaRepository.findAll(pageRequest);
+    }
+
+    @Override
+    public List<PautaDTO> findAllPautas() {
+        log.debug("Buscar todas as pautas");
+        return pautaRepository.findAll().stream().filter(pauta -> pauta != null).map(PautaDTO::new).collect(Collectors.toList());
+    }
+
+    @Override
+    public ResultadoPautaEleitaDTO getPautasEleita(Integer id) {
+        log.debug("Buscar os resutados da pauta eleita {}", id);
+        Pauta pauta = findByIdPauta(id);
+        return getResultadosPautaEleita(pauta);
+
+    }
+
+    private ResultadoPautaEleitaDTO getResultadosPautaEleita(Pauta pauta) {
+        ResultadoPautaEleitaDTO resultadoPautaEleitaDTO = new ResultadoPautaEleitaDTO();
+        Long votosFavoraveis = getNumeroVotosFavoraveis(pauta);
+        Long votosContra = getNumeroVotosContra(pauta);
+        resultadoPautaEleitaDTO.setPautaDTO(new PautaDTO(pauta));
+        resultadoPautaEleitaDTO.setVotosFavoraveis(votosFavoraveis);
+        resultadoPautaEleitaDTO.setVotosContras(votosContra);
+        resultadoPautaEleitaDTO.setEleita(isEleita(votosFavoraveis, votosContra));
+        return resultadoPautaEleitaDTO;
+    }
+
+    private Boolean isEleita(Long votosFavoraveis, Long votosContra) {
+        return votosFavoraveis > votosContra;
+    }
+
+    private Long getNumeroVotosFavoraveis(Pauta pauta) {
+        return pauta.getVotacoes().stream().filter(votacao -> Boolean.TRUE.equals(votacao.getVoto())).count();
+    }
+
+    private Long getNumeroVotosContra(Pauta pauta) {
+        return pauta.getVotacoes().stream().filter(votacao -> Boolean.FALSE.equals(votacao.getVoto())).count();
     }
 }

@@ -4,6 +4,7 @@ import com.sistema.votacao.domain.Pauta;
 import com.sistema.votacao.services.PautaService;
 import com.sistema.votacao.services.dto.PautaDTO;
 import com.sistema.votacao.services.dto.PautaVotadaDTO;
+import com.sistema.votacao.services.dto.ResultadoPautaEleitaDTO;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 
 @RequiredArgsConstructor
 @RestController
@@ -27,9 +30,24 @@ public class PautaResource {
 
     @ApiOperation(value="Busca por id")
     @GetMapping(value = "/{id}")
-    public ResponseEntity<Pauta> findById(@PathVariable Integer id) {
+    public ResponseEntity<PautaDTO> findById(@PathVariable Integer id) {
         Pauta pauta = pautaService.findByIdPauta(id);
-        return ResponseEntity.ok().body(pauta);
+        PautaDTO pautaDTO = new PautaDTO(pauta);
+        return ResponseEntity.ok().body(pautaDTO);
+    }
+
+    @ApiOperation(value="Busca toda as pautas.")
+    @GetMapping
+    public ResponseEntity<List<PautaDTO>> findAllPautas() {
+        List<PautaDTO> pautasDTO = pautaService.findAllPautas();
+        return ResponseEntity.ok().body(pautasDTO);
+    }
+
+    @ApiOperation(value="Busca os resultados da pauta eleita")
+    @GetMapping(value = "/resultados/{id}")
+    public ResponseEntity<ResultadoPautaEleitaDTO> getPautasEleita(@PathVariable Integer id) {
+        ResultadoPautaEleitaDTO resultadoPautaEleitaDTO = pautaService.getPautasEleita(id);
+        return ResponseEntity.ok().body(resultadoPautaEleitaDTO);
     }
 
     @ApiOperation(value="Salva uma nova pauta.")
@@ -47,7 +65,7 @@ public class PautaResource {
     }
 
     @ApiOperation(value="Paginacao.")
-    @GetMapping()
+    @GetMapping(value = "/pages")
     public ResponseEntity<Page<PautaDTO>> findpage(
             @RequestParam(value = "page", defaultValue = "0") Integer page,
             @RequestParam(value = "linesPerPage", defaultValue = "24") Integer linesPerPage) {
